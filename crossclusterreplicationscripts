@@ -1,0 +1,83 @@
+
+###IAM Policy Change at the leader node###
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "*"
+      },
+      "Action": "es:*",
+      "Resource": "arn:aws:es:eu-west-1:accountnumber:domain/ames710-m5large-4/*"
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "*"
+      },
+      "Action": "es:ESCrossClusterGet",
+      "Resource": "arn:aws:es:eu-west-1:accountnumber:domain/ames710-m5large-4"
+    }
+  ]
+}
+
+
+###Kibana scripts###
+
+#Leader Node
+
+PUT leader-01
+
+PUT leader-01/_doc/1
+{
+   "Doctor Sleep":"Stephen King"
+}
+
+
+PUT books-are-fun
+
+PUT csstest
+
+
+
+DELETE leader-01
+DELETE books-are-fun
+DELETE csstest
+
+
+#Follower Node
+
+PUT _plugins/_replication/follower-01/_start
+{
+   "leader_alias": "connection_ames710-m5large-4",
+   "leader_index": "leader-01",
+   "use_roles":{
+      "leader_cluster_role": "all_access",
+      "follower_cluster_role": "all_access"
+   }
+}
+
+GET _plugins/_replication/follower-01/_status
+
+
+
+
+GET follower-01/_search
+
+POST _plugins/_replication/follower-01/_start
+{}
+
+POST _plugins/_replication/_autofollow
+{
+   "leader_alias" : "connection_ames710-m5large-4",
+   "name": "rule-name",
+   "pattern": "books*",
+   "use_roles":{
+      "leader_cluster_role": "all_access",
+      "follower_cluster_role": "all_access"
+   }
+}
+
+GET _cat/indices
